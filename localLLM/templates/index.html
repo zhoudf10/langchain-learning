@@ -1,0 +1,58 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Streaming Example</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        var socket = io();
+        document.addEventListener('DOMContentLoaded', (event) => {
+            var outputDiv = document.getElementById('output');
+            socket.on('connect', function() {
+                console.log('Connected to the server');
+            });
+
+            socket.on('disconnect', function() {
+                console.log('Disconnected from the server');
+            });
+
+            socket.on('stream', function(data) {
+                // console.log('Received data: ' + data);
+                data = data.replace(/\n/g, '');
+                outputDiv.textContent += data; // Append data to the output div
+            });
+
+            socket.on('finished', function(data) {  
+                console.log('Streaming finished: ' + data);
+                outputDiv.textContent += data; // Append finished message
+            });
+
+            var inputField = document.getElementById('userInput');
+            inputField.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    let value = inputField.value       
+                    $("#output").append(value+"\n")
+                    socket.emit('message', value);
+                    inputField.value = '';
+                }
+            });
+        });
+        function send(){
+            var inputField = document.getElementById('userInput');     
+            let value = inputField.value       
+            $("#output").append(value+"\n")
+            socket.emit('message', value);
+            inputField.value = '';
+        }
+    </script>
+</head>
+<body>
+    <h1>输入</h1>
+    <textarea id="userInput" style="width: 60%; height: 200px; font-family: monospace; white-space: pre-wrap;"></textarea>
+    <button onclick="send()">发送</button>
+    <h2>结果：</h2>
+    <span id="output" style="white-space: pre-wrap;  font-family: monospace;"></span>
+</body>
+</html>
